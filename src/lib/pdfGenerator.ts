@@ -1,4 +1,6 @@
 import PDFDocument from "pdfkit";
+import fs from "fs";
+import path from "path";
 
 export interface PDFData {
   inspectorName: string;
@@ -21,7 +23,18 @@ export async function generatePDF(data: PDFData): Promise<Buffer> {
       });
 
       // Branding & Header
-      doc.fillColor("#0B1E36").fontSize(24).text("SafeCheck AI", { align: "center" });
+      const logoPng = path.join(process.cwd(), "public", "logo.png");
+      const logoJpg = path.join(process.cwd(), "public", "logo.jpg");
+      let logoPath = null;
+      if (fs.existsSync(logoPng)) logoPath = logoPng;
+      else if (fs.existsSync(logoJpg)) logoPath = logoJpg;
+
+      if (logoPath) {
+        doc.image(logoPath, { fit: [250, 100], align: "center" });
+        doc.moveDown(1);
+      } else {
+        doc.fillColor("#0B1E36").fontSize(24).text("SafeCheck AI", { align: "center" });
+      }
       doc.fontSize(14).fillColor("#FF6B35").text("Reporte de Inspección de Seguridad", { align: "center" });
       doc.moveDown(2);
 
