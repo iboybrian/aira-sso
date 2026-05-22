@@ -75,20 +75,21 @@ Tono: profesional, claro y directo. Evita tecnicismos innecesarios y sé especí
       imageParts
     );
 
-    // Generate PDF and send to Telegram asynchronously
-    generatePDF({
-      inspectorName,
-      date,
-      company,
-      area,
-      observation,
-      analysisResponse,
-      imageParts
-    }).then((pdfBuffer) => {
-      sendTelegramDocument(pdfBuffer, `📋 Nuevo reporte de inspección generado — ${company} | ${area} | ${date}`);
-    }).catch((e) => {
+    // Generate PDF and send to Telegram (await to prevent Vercel from killing it)
+    try {
+      const pdfBuffer = await generatePDF({
+        inspectorName,
+        date,
+        company,
+        area,
+        observation,
+        analysisResponse,
+        imageParts
+      });
+      await sendTelegramDocument(pdfBuffer, `📋 Nuevo reporte de inspección generado — ${company} | ${area} | ${date}`);
+    } catch (e) {
       console.error("Error generating or sending PDF:", e);
-    });
+    }
 
     return NextResponse.json({ success: true, analysis: analysisResponse });
 
