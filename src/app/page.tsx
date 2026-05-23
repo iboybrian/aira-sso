@@ -8,6 +8,7 @@ export default function Home() {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   const [results, setResults] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,28 +37,46 @@ export default function Home() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setIsRetrying(false);
     setResults(null);
 
     const formData = new FormData(e.currentTarget);
     images.forEach(img => formData.append("images", img));
 
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        setResults(data.analysis);
-      } else {
-        alert(data.error);
+    const maxRetries = 3;
+    let attempt = 0;
+    let success = false;
+
+    while (attempt < maxRetries && !success) {
+      try {
+        if (attempt > 0) setIsRetrying(true);
+        
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          body: formData,
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          setResults(data.analysis);
+        } else {
+          alert(data.error);
+        }
+        success = true;
+      } catch (err) {
+        attempt++;
+        if (attempt >= maxRetries) {
+          alert("Error de conexión al enviar el reporte tras varios intentos. Verifica tu señal.");
+        } else {
+          // Wait 2 seconds before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       }
-    } catch (err) {
-      alert("Error de conexión al enviar el reporte.");
-    } finally {
-      setIsSubmitting(false);
     }
+    
+    setIsSubmitting(false);
+    setIsRetrying(false);
   };
   
   const renderResults = () => {
@@ -207,7 +226,7 @@ export default function Home() {
           {isSubmitting ? (
             <>
               <Loader2 className={styles.loader} />
-              Analizando... esto puede tomar unos segundos
+              {isRetrying ? "Reintentando conexión..." : "Analizando... esto puede tomar unos segundos"}
             </>
           ) : (
             "Analizar inspección"
