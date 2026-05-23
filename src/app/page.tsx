@@ -2,6 +2,7 @@
 
 import { useState, useRef, FormEvent } from "react";
 import styles from "./page.module.css";
+import imageCompression from 'browser-image-compression';
 import { UploadCloud, X, Loader2, CheckCircle2 } from "lucide-react";
 
 export default function Home() {
@@ -12,12 +13,27 @@ export default function Home() {
   const [results, setResults] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
-      setImages((prev) => [...prev, ...filesArray]);
       
-      filesArray.forEach(file => {
+      const compressedFiles = await Promise.all(filesArray.map(async (file) => {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        try {
+          return await imageCompression(file, options);
+        } catch (error) {
+          console.error("Error comprimiendo imagen:", error);
+          return file;
+        }
+      }));
+
+      setImages((prev) => [...prev, ...compressedFiles]);
+      
+      compressedFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {

@@ -9,7 +9,7 @@ El sistema recibe un reporte de inspección junto a evidencia fotográfica y, a 
 - **Next.js & React:** Framework principal utilizado para el desarrollo tanto del frontend (interfaz de usuario) como de la API interna.
 - **TypeScript:** Lenguaje base de todo el proyecto para garantizar un tipado estricto y prevenir errores durante el desarrollo.
 - **Inteligencia Artificial (IA):**
-  - **Google GenAI SDK:** Utilizado para conectar con el modelo `gemini-2.5-flash`.
+  - **Google GenAI SDK:** Utilizado para conectar con el modelo `gemini-3.5-flash`.
   - **Anthropic SDK:** Soporte alternativo (dependiendo del entorno) para conectar con el modelo `claude-sonnet-4-6`.
 - **PDFKit:** Librería en Node.js para la generación y renderización del documento PDF del reporte.
 - **Telegram Bot API:** Empleado para enviar notificaciones automáticas y el documento PDF generado a los encargados de seguridad.
@@ -35,7 +35,7 @@ Es el motor principal de la aplicación. Recibe los datos del frontend (mediante
 5. Retorna la evaluación de la IA al frontend para ser mostrada en pantalla.
 
 ### 3. Integración con IA (`src/lib/ai/provider.ts`)
-Módulo encargado de interactuar con las APIs de los LLM. Por defecto, utiliza **Gemini 2.5 Flash**, enviándole el prompt estructurado, las notas del inspector y las imágenes adjuntas. Si la variable de entorno `AI_PROVIDER` es `claude`, utiliza Claude Sonnet de Anthropic. Retorna la respuesta de la IA en texto crudo.
+Módulo encargado de interactuar con las APIs de los LLM. Por defecto, utiliza **Gemini 3.5 Flash**, enviándole el prompt estructurado, las notas del inspector y las imágenes adjuntas. Si la variable de entorno `AI_PROVIDER` es `claude`, utiliza Claude Sonnet de Anthropic. Retorna la respuesta de la IA en texto crudo.
 
 ### 4. Generación de PDF (`src/lib/pdfGenerator.ts`)
 Utilizando `PDFKit`, toma los datos brutos y la respuesta de la IA y dibuja un reporte profesional.
