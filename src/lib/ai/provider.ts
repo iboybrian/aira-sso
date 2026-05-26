@@ -44,7 +44,7 @@ export async function generateSafetyReport(
 
     return (response.content[0] as any).text;
   } else {
-    // Default to Gemini 3.5 Flash
+    // Default to Gemini 2.5 Flash
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     
     const imageParts = images.map((img) => ({
@@ -55,7 +55,7 @@ export async function generateSafetyReport(
     }));
 
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: [
         {
           role: "user",
